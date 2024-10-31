@@ -1,6 +1,7 @@
 # masked_prosody_model
 ```
-pip install masked_prosody_model==0.1.0
+pip install masked_prosody_model
+pip install git+https://github.com/minixc/srmrpy
 ```
 torch and torchaudio need to be installed as well.
 
