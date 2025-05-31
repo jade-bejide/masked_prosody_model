@@ -1,15 +1,16 @@
 from pathlib import Path
 from dataclasses import dataclass
+import logging
+from typing import Dict, List, Optional, Tuple, Union
 
 import yaml
 import torch
 from torch import nn
 from transformers.utils.hub import cached_file
-from rich.console import Console
 import librosa
 import numpy as np
 
-console = Console()
+logger = logging.getLogger(__name__)
 
 from masked_prosody_model.modules import (
     PositionalEncoding,
@@ -17,7 +18,7 @@ from masked_prosody_model.modules import (
     ConformerLayer,
 )
 
-from speech_collator.measures import (
+from .measures import (
     PitchMeasure,
     EnergyMeasure,
     VoiceActivityMeasure,
@@ -26,6 +27,23 @@ from speech_collator.measures import (
 
 @dataclass
 class ModelArgs:
+    """Configuration arguments for the MaskedProsodyModel.
+    
+    Attributes:
+        n_layers: Number of transformer layers
+        n_heads: Number of attention heads
+        kernel_size: Size of the convolutional kernel
+        filter_size: Size of the filter/dimension of the model
+        hidden_dim: Hidden dimension size
+        dropout: Dropout rate
+        pitch_min: Minimum pitch value
+        pitch_max: Maximum pitch value
+        energy_min: Minimum energy value
+        energy_max: Maximum energy value
+        vad_min: Minimum voice activity detection value
+        vad_max: Maximum voice activity detection value
+        bins: Number of quantization bins
+    """
     n_layers: int = 8
     n_heads: int = 2
     kernel_size: int = 7
@@ -42,10 +60,21 @@ class ModelArgs:
 
 
 class MaskedProsodyModel(nn.Module):
+    """A transformer-based model for prosody prediction with masked inputs.
+    
+    This model processes pitch, energy, and voice activity detection features
+    to predict prosodic patterns in speech.
+    """
+    
     def __init__(
         self,
-        args,
-    ):
+        args: ModelArgs,
+    ) -> None:
+        """Initialize the MaskedProsodyModel.
+        
+        Args:
+            args: Model configuration arguments
+        """
         super().__init__()
 
         bins = args.bins
@@ -91,7 +120,12 @@ class MaskedProsodyModel(nn.Module):
 
         self.bins = torch.linspace(0, 1, bins)
 
-    def _init_weights(self, module):
+    def _init_weights(self, module: nn.Module) -> None:
+        """Initialize the weights of the model.
+        
+        Args:
+            module: The module to initialize weights for
+        """
         if isinstance(module, nn.Linear):
             module.weight.data.normal_(mean=0.0, std=0.02)
             if module.bias is not None:
@@ -100,7 +134,20 @@ class MaskedProsodyModel(nn.Module):
             module.bias.data.zero_()
             module.weight.data.fill_(1.0)
 
-    def forward(self, x, return_layer=None):
+    def forward(
+        self, 
+        x: torch.Tensor, 
+        return_layer: Optional[int] = None
+    ) -> Union[List[torch.Tensor], Dict[str, Union[List[torch.Tensor], torch.Tensor]]]:
+        """Forward pass of the model.
+        
+        Args:
+            x: Input tensor of shape [batch_size, seq_len, 3]
+            return_layer: If specified, returns intermediate layer representations
+            
+        Returns:
+            Either a list of output tensors or a dictionary containing outputs and representations
+        """
         pitch = x[:, 0]
         energy = x[:, 1]
         vad = x[:, 2]
@@ -132,27 +179,38 @@ class MaskedProsodyModel(nn.Module):
                 vad,
             ]
 
-    def save_model(self, path, accelerator=None, onnx=False):
+    def save_model(self, path: Union[str, Path], accelerator: Optional[object] = None) -> None:
+        """Save the model to disk.
+        
+        Args:
+            path: Path to save the model to
+            accelerator: Optional accelerator object for distributed training
+        """
         path = Path(path)
         path.mkdir(parents=True, exist_ok=True)
         if accelerator is not None:
             accelerator.save_model(self, path)
         else:
             torch.save(self.state_dict(), path / "pytorch_model.bin")
-        if onnx:
-            try:
-                self.export_onnx(path / "model.onnx")
-            except Exception as e:
-                console.print(f"[red]Skipping ONNX export[/red]: {e}")
         with open(path / "model_config.yml", "w") as f:
             f.write(yaml.dump(self.args.__dict__, Dumper=yaml.Dumper))
 
     @staticmethod
-    def from_pretrained(path_or_hubid):
+    def from_pretrained(path_or_hubid: Union[str, Path]) -> 'MaskedProsodyModel':
+        """Load a pretrained model from disk or hub.
+        
+        Args:
+            path_or_hubid: Path to model directory or hub model ID
+            
+        Returns:
+            Loaded MaskedProsodyModel instance
+        """
+        local_model = False
         path = Path(path_or_hubid)
         if path.exists():
             config_file = path / "model_config.yml"
             model_file = path / "pytorch_model.bin"
+            local_model = True
         else:
             config_file = cached_file(path_or_hubid, "model_config.yml")
             model_file = cached_file(path_or_hubid, "pytorch_model.bin")
@@ -169,7 +227,16 @@ class MaskedProsodyModel(nn.Module):
         model.load_state_dict(torch.load(model_file))
         return model
 
-    def process_audio(self, audio_path, layer=7):
+    def process_audio(self, audio_path: Union[str, Path], layer: int = 7) -> torch.Tensor:
+        """Process an audio file and extract model representations.
+        
+        Args:
+            audio_path: Path to the audio file
+            layer: Which layer's representations to return
+            
+        Returns:
+            Tensor containing the model's representations
+        """
         audio, sr = librosa.load(audio_path, sr=22050)
         audio = audio / np.abs(audio).max()
         # window into 6s chunks
@@ -216,7 +283,12 @@ class MaskedProsodyModel(nn.Module):
         return representations
 
     @property
-    def dummy_input(self):
+    def dummy_input(self) -> torch.Tensor:
+        """Generate dummy input for the model.
+        
+        Returns:
+            Tensor of shape [1, max_length, 3] containing random values
+        """
         torch.manual_seed(0)
         return torch.stack(
             [
