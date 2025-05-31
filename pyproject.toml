@@ -1,6 +1,6 @@
 [project]
 name = "masked_prosody_model"
-version = "0.2.0"
+version = "0.3.0"
 description = ""
 authors = [
     {name = "Christoph Minixhofer", email = "christoph.minixhofer@gmail.com"},
@@ -32,8 +32,3 @@ test = [
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 addopts = "-v --cov=masked_prosody_model"
-markers = [
-    "torch_version(version): mark test to run with specific PyTorch version",
-    "torch_2_0: mark test for PyTorch 2.0+",
-    "torch_1_x: mark test for PyTorch 1.x",
-]
