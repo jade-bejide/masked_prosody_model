@@ -1,6 +1,6 @@
 [project]
 name = "masked_prosody_model"
-version = "0.1.0"
+version = "0.2.0"
 description = ""
 authors = [
     {name = "Christoph Minixhofer", email = "christoph.minixhofer@gmail.com"},
@@ -8,17 +8,19 @@ authors = [
 dependencies = [
     "pyyaml>=6.0.1",
     "rich>=13.6.0",
-    "speech-collator>=0.1.18",
+    "speech-collator>=0.1.19",
     "transformers>=4.34.0",
     "librosa>=0.9.2",
     "torchaudio>=2.1.0",
     "nnaudio>=0.3.2",
     "pandas>=2.0.3",
+    "penn>=0.0.6",
+    "torbi==1.0.0",
 ]
 requires-python = ">=3.8"
 readme = "README.md"
 license = {text = "MIT"}
 
 [build-system]
-requires = ["pdm-backend"]
-build-backend = "pdm.backend"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
