@@ -5,6 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Tests](https://github.com/minixc/masked_prosody_model/actions/workflows/tests.yml/badge.svg)](https://github.com/minixc/masked_prosody_model/actions/workflows/tests.yml)
 [![codecov](https://codecov.io/gh/minixc/masked_prosody_model/branch/main/graph/badge.svg)](https://codecov.io/gh/minixc/masked_prosody_model)
+
 [![Model on HF](https://huggingface.co/datasets/huggingface/badges/resolve/main/model-on-hf-xl-dark.svg)](https://huggingface.co/cdminix/masked_prosody_model)
 
 A transformer-based model for prosody prediction with masked inputs. This model processes pitch, energy, and voice activity detection features to predict prosodic patterns in speech.
