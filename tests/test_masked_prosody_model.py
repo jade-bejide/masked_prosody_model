@@ -126,3 +126,8 @@ def test_model_save_load(model, model_args, dummy_input):
         assert isinstance(loaded_model, MaskedProsodyModel)
         
         assert loaded_model.args.bins == model_args.bins
+
+def test_full_pipeline(model):
+    audio_path = "tests/test_audio.wav"
+    representation = model.process_audio(audio_path, layer=7)
+    assert representation.shape == torch.Size([727, 256])
