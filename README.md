@@ -3,8 +3,8 @@
 [![PyPI version](https://badge.fury.io/py/masked-prosody-model.svg)](https://badge.fury.io/py/masked-prosody-model)
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://github.com/cdminix/masked_prosody_model/actions/workflows/tests.yml/badge.svg)](https://github.com/cdminix/masked_prosody_model/actions/workflows/tests.yml)
-[![codecov](https://codecov.io/gh/cdminix/masked_prosody_model/branch/main/graph/badge.svg)](https://codecov.io/gh/cdminix/masked_prosody_model)
+[![Tests](https://github.com/minixc/masked_prosody_model/actions/workflows/tests.yml/badge.svg)](https://github.com/minixc/masked_prosody_model/actions/workflows/tests.yml)
+[![codecov](https://codecov.io/gh/minixc/masked_prosody_model/branch/main/graph/badge.svg)](https://codecov.io/gh/minixc/masked_prosody_model)
 
 A transformer-based model for prosody prediction with masked inputs. This model processes pitch, energy, and voice activity detection features to predict prosodic patterns in speech.
 
