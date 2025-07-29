@@ -240,7 +240,7 @@ class MaskedProsodyModel(nn.Module):
         """
 
         # convert audio to values
-        audio = audio.values.T
+        audio = audio.values.ravel()
         audio = audio / np.abs(audio).max()
         # window into 6s chunks
         windows = []
