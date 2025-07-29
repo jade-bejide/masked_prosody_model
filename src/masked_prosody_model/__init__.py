@@ -9,6 +9,7 @@ from torch import nn
 from transformers.utils.hub import cached_file
 import librosa
 import numpy as np
+import parselmouth as pm
 
 logger = logging.getLogger(__name__)
 
@@ -227,7 +228,7 @@ class MaskedProsodyModel(nn.Module):
         model.load_state_dict(torch.load(model_file))
         return model
 
-    def process_audio(self, audio_path: Union[str, Path], layer: int = 7) -> torch.Tensor:
+    def process_audio(self, audio: pm.Sound, sr: int, layer: int = 7) -> torch.Tensor:
         """Process an audio file and extract model representations.
         
         Args:
@@ -237,7 +238,9 @@ class MaskedProsodyModel(nn.Module):
         Returns:
             Tensor containing the model's representations
         """
-        audio, sr = librosa.load(audio_path, sr=22050)
+
+        # convert audio to values
+        audio = audio.values.T
         audio = audio / np.abs(audio).max()
         # window into 6s chunks
         windows = []
